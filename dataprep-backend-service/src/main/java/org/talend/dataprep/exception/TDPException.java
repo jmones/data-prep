@@ -13,13 +13,14 @@
 
 package org.talend.dataprep.exception;
 
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
+
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.StreamSupport;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +30,8 @@ import org.talend.daikon.exception.error.ErrorCode;
 import org.talend.daikon.exception.json.JsonErrorCode;
 import org.talend.dataprep.exception.error.ErrorMessage;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 /**
  * Class for all business (TDP) exception.
@@ -46,7 +43,7 @@ public class TDPException extends TalendRuntimeException {
     private static final Logger LOGGER = LoggerFactory.getLogger(TDPException.class);
 
     /**
-     * this field if set to <code>true</code> will prevent {@link TDPExceptionController} to log a stack trace
+     * this field if set to <code>true</code> will prevent {@link TDPExceptionController} to log a stack trace.
      */
     private boolean error = false;
 
@@ -129,34 +126,23 @@ public class TDPException extends TalendRuntimeException {
     }
 
     @Override
-    public void writeTo(Writer writer) {
-
-        try {
-            JsonGenerator generator = (new JsonFactory()).createGenerator(writer);
-            generator.writeStartObject();
-            writeErrorContent(generator);
-            generator.writeEndObject();
-            generator.flush();
-        } catch (IOException e) {
-            LOGGER.error("Unable to write exception to " + writer + ".", e);
-        }
-
+    public String getMessage() {
+        return message;
     }
 
-    private void writeErrorContent(JsonGenerator generator) throws IOException {
-        generator.writeStringField("code", getCode().getProduct() + '_' + getCode().getGroup() + '_' + getCode().getCode());
-        generator.writeStringField("message", message);
-        generator.writeStringField("message_title", messageTitle);
-        if (getCause() != null) {
-            generator.writeStringField("cause", getCause().getMessage());
-        }
-        if (getContext() != null) {
-            generator.writeFieldName("context");
-            generator.writeStartObject();
-            for (Map.Entry<String, Object> entry : getContext().entries()) {
-                generator.writeStringField(entry.getKey(), entry.getValue().toString());
-            }
-            generator.writeEndObject();
+    public String getMessageTitle() {
+        return messageTitle;
+    }
+
+    @Override
+    public void writeTo(Writer writer) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+            objectMapper.writeValue(writer, TdpExceptionDto.from(this));
+            writer.flush();
+        } catch (IOException e) {
+            LOGGER.error("Unable to write exception to " + writer + ".", e);
         }
     }
 
