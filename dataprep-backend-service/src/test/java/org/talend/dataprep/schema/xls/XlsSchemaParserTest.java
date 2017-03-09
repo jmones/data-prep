@@ -100,6 +100,17 @@ public class XlsSchemaParserTest extends AbstractSchemaTestUtils {
     }
 
     @Test
+    public void read_xls_TDP_() throws Exception {
+        String fileName = "tdp-3459_big-column-metadata.xml";
+
+        try (InputStream inputStream = this.getClass().getResourceAsStream(fileName)) {
+            List<ColumnMetadata> columnMetadatas = parser.parse(getRequest(inputStream, "#852")).getSheetContents().get(0)
+                    .getColumnMetadatas();
+            Assertions.assertThat(columnMetadatas).isNotNull().isNotEmpty().hasSize(16374);
+        }
+    }
+
+    @Test
     public void parse_should_extract_single_sheet_xls() throws Exception {
         // given
         final String fileName = "simple.xls";
