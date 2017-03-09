@@ -26,7 +26,6 @@ const SuggestionsStats = {
 				  translate-values="{nb: suggestionsStatsCtrl.state.playground.grid.selectedColumns.length}">
 			</span>
 		</div>
-		<ng-transclude></ng-transclude>
     </div>`,
 	transclude: true,
 	controllerAs: 'suggestionsStatsCtrl',
