@@ -80,35 +80,10 @@ public class Trim extends AbstractActionMetadata implements ColumnAction {
         // @formatter:off
         parameters.add(SelectParameter.Builder.builder()
                 .name(PADDING_CHAR_PARAMETER)
-                .item(" ",       "whitespace"               ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u0009", "character_tabulation"     ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u000A", "line_feed_(lf)"           ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u000B", "line_tabulation"          ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u000C", "form_feed_(ff)"           ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u000D", "carriage_return_(cr)"     ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u0085", "next_line_(nel)"          ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u00A0", "no_break_space"           ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u1680", "ogham_space_mark"         ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u180E", "mongolian_vowel_separator") //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u2000", "en_quad"                  ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u2001", "em_quad"                  ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u2002", "en_space"                 ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u2003", "em_space"                 ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u2004", "three_per_em_space"       ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u2005", "four_per_em_space"        ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u2006", "six_per_em_space"         ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u2007", "figure_space"             ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u2008", "punctuation_space"        ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u2009", "thin_space"               ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u200A", "hair_space"               ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u2028", "line_separator"           ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u2029", "paragraph_separator"      ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u202F", "narrow_no_break_space"    ) //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u205F", "medium_mathematical_space") //$NON-NLS-1$ //$NON-NLS-2$
-                .item("\\u3000", "ideographic_space"        ) //$NON-NLS-1$ //$NON-NLS-2$
+                .item("whitespace", "whitespace") //$NON-NLS-1$ //$NON-NLS-2$
                 .item(CUSTOM, CUSTOM,new Parameter(CUSTOM_PADDING_CHAR_PARAMETER, ParameterType.STRING, StringUtils.EMPTY)) 
                 .canBeBlank(true)
-                .defaultValue(" ") //$NON-NLS-1$
+                .defaultValue("whitespace") //$NON-NLS-1$
                 .build());
         // @formatter:on
         return ActionsBundle.attachToAction(parameters, this);
@@ -131,14 +106,12 @@ public class Trim extends AbstractActionMetadata implements ColumnAction {
         final String toTrim = row.get(columnId);
         if (toTrim != null) {
             final Map<String, String> parameters = context.getParameters();
-            String removeChar;
-            if (CUSTOM.equals(parameters.get(PADDING_CHAR_PARAMETER))) {
-                removeChar = parameters.get(CUSTOM_PADDING_CHAR_PARAMETER);
-            } else {
-                removeChar = parameters.get(PADDING_CHAR_PARAMETER);
-            }
             final StringConverter stringConverter = context.get(STRING_CONVERTRT);
-            row.set(columnId, stringConverter.removeTrailingAndLeading(toTrim, removeChar));
+            if (CUSTOM.equals(parameters.get(PADDING_CHAR_PARAMETER))) {
+                row.set(columnId, stringConverter.removeTrailingAndLeading(toTrim, parameters.get(CUSTOM_PADDING_CHAR_PARAMETER)));
+            } else {
+                row.set(columnId, stringConverter.removeTrailingAndLeadingWhitespaces(toTrim));
+            }
         }
     }
 
