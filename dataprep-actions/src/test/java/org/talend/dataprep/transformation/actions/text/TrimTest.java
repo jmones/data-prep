@@ -115,32 +115,32 @@ public class TrimTest extends AbstractMetadataBaseTest {
         parameters = new HashMap<>();
         parameters.put(ImplicitParameters.SCOPE.getKey().toLowerCase(), "column"); //$NON-NLS-1$
         parameters.put(ImplicitParameters.COLUMN_ID.getKey().toLowerCase(), "0000"); //$NON-NLS-1$
-        parameters.put(Trim.PADDING_CHAR_PARAMETER, "\t"); //$NON-NLS-1$
+        parameters.put(Trim.PADDING_CHAR_PARAMETER, "whitespace"); //$NON-NLS-1$
 
         // when
         ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
 
         // then
-        assertEquals(" the beatles ", row.get("0000")); //$NON-NLS-1$ //$NON-NLS-2$
+        assertEquals("the beatles", row.get("0000")); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Test
     public void should_remove_other_value() {
         // given
         final Map<String, String> values = new HashMap<>();
-        values.put("0000", " the beatles " + "\\u2028"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+        values.put("0000", " the beatles " + '\u2028'+""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         final DataSetRow row = new DataSetRow(values);
 
         parameters = new HashMap<>();
         parameters.put(ImplicitParameters.SCOPE.getKey().toLowerCase(), "column"); //$NON-NLS-1$
         parameters.put(ImplicitParameters.COLUMN_ID.getKey().toLowerCase(), "0000"); //$NON-NLS-1$
-        parameters.put(Trim.PADDING_CHAR_PARAMETER, "\\u2028"); //$NON-NLS-1$
+        parameters.put(Trim.PADDING_CHAR_PARAMETER, "whitespace"); //$NON-NLS-1$
 
         // when
         ActionTestWorkbench.test(row, actionRegistry, factory.create(action, parameters));
 
         // then
-        assertEquals(" the beatles ", row.get("0000")); //$NON-NLS-1$ //$NON-NLS-2$
+        assertEquals("the beatles", row.get("0000")); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Test
